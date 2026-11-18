@@ -8,7 +8,38 @@ Every book in your list becomes a book on the shelf: its thickness comes from th
 title is printed on the spine, and the shelves, camera and lights resize themselves to fit however
 many books you have.
 
-## Quick start
+There are two ways to use it:
+
+- **In your browser.** Open the website, choose your CSV, and download the picture. Nothing to
+  install, and your file never leaves your computer.
+- **In Blender.** Open the template file for a path-traced render you can restyle as you like.
+
+## In your browser
+
+The site lives in [`docs/`](docs/) and is plain static files, so GitHub Pages can host it for free.
+Once Pages is switched on (see below) it is at <https://drburke-droid.github.io/Bookshelf/>.
+
+1. Export your library from Goodreads (*My Books → Tools → Import and export → Export Library*).
+2. Choose the CSV on the page, or drop it anywhere on it.
+3. Pick the books, order, colours and picture shape.
+4. Click **Download picture**.
+
+To switch the site on: in the repository on GitHub go to *Settings → Pages*, set **Source** to
+*Deploy from a branch*, choose the `main` branch and the `/docs` folder, and save.
+
+To try it on your own computer:
+
+```bash
+python3 -m http.server 8000 --directory docs
+```
+
+Then open <http://localhost:8000>.
+
+The site draws the shelf with [three.js](https://threejs.org) (MIT licence, included in
+`docs/vendor`). It uses the same layout rules as the Blender script, so both give the same kind of
+shelf, though the exact arrangement differs.
+
+## In Blender
 
 You need [Blender](https://www.blender.org/download/) 4.2 or newer (made and tested with 5.0).
 
@@ -106,4 +137,10 @@ Optionally, so the file opens with the Bookshelf tab selected and the camera vie
 
 ```bash
 blender --enable-autoexec bookshelf_template.blend --python tools/finish_ui.py
+```
+
+The website's decorations are exported from the template:
+
+```bash
+blender -b bookshelf_template.blend --python tools/export_web_assets.py -- docs/assets/props
 ```

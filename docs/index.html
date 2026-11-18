@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bookshelf: turn your reading list into a picture</title>
+  <meta name="description" content="Upload your Goodreads export and get a picture of every book you've read, lined up on a shelf. Runs in your browser; your file is never uploaded.">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three/build/three.module.min.js",
+                   "three/addons/": "./vendor/three/examples/jsm/" } }
+  </script>
+</head>
+<body>
+  <header class="top">
+    <h1>Bookshelf</h1>
+    <p>Turn your reading list into a picture of your books on a shelf.</p>
+  </header>
+
+  <main class="layout">
+    <section class="stage" aria-label="Your bookshelf">
+      <div class="frame" id="frame">
+        <canvas id="canvas" aria-label="Picture of the bookshelf"></canvas>
+        <div class="overlay" id="overlay" hidden></div>
+      </div>
+      <div class="stage-bar">
+        <p class="status" id="status" role="status">Loading…</p>
+        <div class="download">
+          <label class="visually-hidden" for="size">Picture size</label>
+          <select id="size">
+            <option value="1920">Standard (1920 px)</option>
+            <option value="2560">Large (2560 px)</option>
+            <option value="3840" selected>Extra large (3840 px)</option>
+          </select>
+          <button class="primary" id="download" type="button">Download picture</button>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel" aria-label="Settings">
+      <section class="group">
+        <h2>1. Your book list</h2>
+        <label class="drop" id="drop" for="file">
+          <input id="file" type="file" accept=".csv,text/csv,text/plain">
+          <strong id="file-name">Choose your CSV file</strong>
+          <span>or drop it anywhere on this page</span>
+        </label>
+        <p class="hint">Your file stays on your computer. Nothing is uploaded.
+          <button class="link" id="sample" type="button">Use the sample list</button></p>
+        <p class="error" id="error" role="alert" hidden></p>
+        <details>
+          <summary>Where do I get my Goodreads file?</summary>
+          <ol>
+            <li>On the Goodreads website, open <em>My Books</em>.</li>
+            <li>Choose <em>Tools → Import and export</em>.</li>
+            <li>Click <em>Export Library</em>, then download <code>goodreads_library_export.csv</code>.</li>
+          </ol>
+          <p>A StoryGraph export, or any CSV with a <code>Title</code> column, also works.</p>
+        </details>
+      </section>
+
+      <section class="group">
+        <h2>2. Which books</h2>
+        <div class="field"><label for="shelf">Books</label>
+          <select id="shelf">
+            <option value="read">Read</option>
+            <option value="current">Currently reading</option>
+            <option value="to-read">Want to read</option>
+            <option value="all">All</option>
+          </select></div>
+        <div class="field"><label for="year">Year read</label>
+          <select id="year"><option value="0">Every year</option></select></div>
+        <div class="field"><label for="limit">Limit</label>
+          <input id="limit" type="number" min="0" step="1" value="0" inputmode="numeric" aria-describedby="limit-help"></div>
+        <p class="hint" id="limit-help">Most books to show. 0 shows them all.</p>
+        <div class="field"><label for="sort">Order</label>
+          <select id="sort">
+            <option value="date">Date read</option>
+            <option value="author">Author</option>
+            <option value="title">Title</option>
+            <option value="thickness">Thickness</option>
+            <option value="rating">My rating</option>
+            <option value="colour">Colour</option>
+            <option value="shuffle">Shuffled</option>
+            <option value="file">As in the file</option>
+          </select></div>
+        <label class="check"><input id="reverse" type="checkbox"> Reverse order</label>
+      </section>
+
+      <section class="group">
+        <h2>3. The look</h2>
+        <div class="field"><label for="shape">Picture shape</label>
+          <select id="shape">
+            <option value="1.7778">Wide (16:9)</option>
+            <option value="1.5">Photo (3:2)</option>
+            <option value="1">Square</option>
+            <option value="0.8">Portrait (4:5)</option>
+            <option value="0.5625">Phone (9:16)</option>
+          </select></div>
+        <div class="field"><label for="style">Style</label>
+          <select id="style">
+            <option value="floating">Floating shelves</option>
+            <option value="bookcase">Bookcase</option>
+          </select></div>
+        <div class="field"><label for="rows">Shelves</label>
+          <select id="rows"><option value="0">Automatic</option></select></div>
+        <div class="field"><label for="palette">Colours</label>
+          <select id="palette">
+            <option value="classic">Classic</option>
+            <option value="leather">Old library</option>
+            <option value="vivid">Vivid</option>
+            <option value="pastel">Pastel</option>
+            <option value="mono">Black and white</option>
+          </select></div>
+        <div class="field"><label for="color-by">Colour by</label>
+          <select id="color-by">
+            <option value="book">Each book</option>
+            <option value="author">Author</option>
+          </select></div>
+        <div class="field"><label for="wall">Wall</label>
+          <input id="wall" type="color" value="#42121c"></div>
+        <label class="check"><input id="pattern" type="checkbox" checked> Wallpaper pattern</label>
+        <div class="field"><label for="thickness">Thickness</label>
+          <input id="thickness" type="range" min="0.6" max="1.8" step="0.05" value="1"></div>
+        <div class="field"><label for="seed">Variation</label>
+          <span class="pair"><input id="seed" type="number" min="1" step="1" value="1" inputmode="numeric">
+            <button id="shuffle" type="button">Surprise me</button></span></div>
+        <label class="check"><input id="titles" type="checkbox" checked> Titles on spines</label>
+        <label class="check"><input id="shorten" type="checkbox" checked> Shorten long titles</label>
+        <label class="check"><input id="leaning" type="checkbox" checked> Leaning books</label>
+        <label class="check"><input id="stacks" type="checkbox" checked> Flat stacks</label>
+        <label class="check"><input id="decor" type="checkbox" checked> Decorations</label>
+      </section>
+
+      <footer class="foot">
+        <p>Goodreads exports no cover art, so cover colours are chosen for you.</p>
+        <p>Decorations and shelf wood are CC0 assets from <a href="https://polyhaven.com">Poly Haven</a>.
+          Want a path-traced render? Get the
+          <a href="https://github.com/drburke-droid/Bookshelf">Blender template</a>.</p>
+      </footer>
+    </aside>
+  </main>
+
+  <noscript>This page needs JavaScript to draw your bookshelf.</noscript>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
