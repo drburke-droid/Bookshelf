@@ -1,0 +1,95 @@
+Book Id,Title,Author,Author l-f,Additional Authors,ISBN,ISBN13,My Rating,Average Rating,Publisher,Binding,Number of Pages,Year Published,Original Publication Year,Date Read,Date Added,Bookshelves,Bookshelves with positions,Exclusive Shelf,My Review,Spoiler,Private Notes,Read Count,Owned Copies
+1000,Pride and Prejudice,Jane Austen,"Austen, Jane",,,,4,3.79,,Paperback,279,1919,1813,2019/02/05,2019/02/05,,,read,,,,1,0
+1001,"Moby-Dick; or, The Whale",Herman Melville,"Melville, Herman",,,,5,3.49,,Paperback,720,2025,1851,2019/02/21,2019/02/21,,,read,,,,1,0
+1002,The Count of Monte Cristo,Alexandre Dumas,"Dumas, Alexandre",,,,5,3.61,,Paperback,1276,1955,1844,2019/03/08,2019/03/08,,,read,,,,1,0
+1003,Jane Eyre,Charlotte Brontë,"Brontë, Charlotte",,,,4,3.47,,Paperback,532,1958,1847,2019/04/19,2019/04/19,,,read,,,,1,0
+1004,Wuthering Heights,Emily Brontë,"Brontë, Emily",,,,3,4.23,,Paperback,464,1962,1847,2019/05/02,2019/05/02,,,read,,,,1,0
+1005,Great Expectations,Charles Dickens,"Dickens, Charles",,,,5,4.03,,Paperback,505,1968,1861,2019/06/28,2019/06/28,,,read,,,,1,0
+1006,A Tale of Two Cities,Charles Dickens,"Dickens, Charles",,,,3,4.38,,Mass Market Paperback,489,1964,1859,2019/07/09,2019/07/09,,,read,,,,1,0
+1007,Crime and Punishment,Fyodor Dostoevsky,"Dostoevsky, Fyodor",,,,4,3.82,,Paperback,671,2035,1866,2019/08/01,2019/08/01,,,read,,,,1,0
+1008,The Brothers Karamazov,Fyodor Dostoevsky,"Dostoevsky, Fyodor",,,,5,3.71,,Paperback,796,2003,1880,2019/08/20,2019/08/20,,,read,,,,1,0
+1009,War and Peace,Leo Tolstoy,"Tolstoy, Leo",,,,5,3.97,,Hardcover,1392,1993,1869,2019/09/10,2019/09/10,,,read,,,,1,0
+1010,Anna Karenina,Leo Tolstoy,"Tolstoy, Leo",,,,3,3.95,,Paperback,964,1986,1878,2019/10/17,2019/10/17,,,read,,,,1,0
+1011,Les Misérables,Victor Hugo,"Hugo, Victor",,,,5,3.61,,Mass Market Paperback,1463,2030,1862,2019/11/04,2019/11/04,,,read,,,,1,0
+1012,Don Quixote,Miguel de Cervantes Saavedra,"Saavedra, Miguel de Cervantes",,,,4,3.87,,Paperback,1023,1763,1605,2019/12/15,2019/12/15,,,read,,,,1,0
+1013,Frankenstein: The 1818 Text,Mary Wollstonecraft Shelley,"Shelley, Mary Wollstonecraft",,,,4,3.65,,Paperback,260,1941,1818,2020/01/21,2020/01/21,,,read,,,,1,0
+1014,Dracula,Bram Stoker,"Stoker, Bram",,,,3,3.97,,Paperback,488,2064,1897,2020/02/20,2020/02/20,,,read,,,,1,0
+1015,The Picture of Dorian Gray,Oscar Wilde,"Wilde, Oscar",,,,4,4.13,,Paperback,272,2026,1890,2020/03/07,2020/03/07,,,read,,,,1,0
+1016,"The Adventures of Sherlock Holmes (Sherlock Holmes, #3)",Arthur Conan Doyle,"Doyle, Arthur Conan",,,,3,3.91,,Paperback,339,2013,1892,2020/04/23,2020/04/23,,,read,,,,1,0
+1017,"The Hound of the Baskervilles (Sherlock Holmes, #5)",Arthur Conan Doyle,"Doyle, Arthur Conan",,,,4,4.33,,Mass Market Paperback,256,2003,1902,2020/05/28,2020/05/28,,,read,,,,1,0
+1018,Treasure Island,Robert Louis Stevenson,"Stevenson, Robert Louis",,,,3,4.36,,Paperback,311,1992,1883,2020/06/10,2020/06/10,,,read,,,,1,0
+1019,The Time Machine,H.G. Wells,"Wells, H.G.",,,,4,4.10,,Mass Market Paperback,118,2071,1895,2020/07/14,2020/07/14,,,read,,,,1,0
+1020,The War of the Worlds,H.G. Wells,"Wells, H.G.",,,,5,4.20,,Mass Market Paperback,192,2006,1898,2020/09/01,2020/09/01,,,read,,,,1,0
+1021,Twenty Thousand Leagues Under the Sea,Jules Verne,"Verne, Jules",,,,4,3.87,,Paperback,394,1978,1870,2020/09/18,2020/09/18,,,read,,,,1,0
+1022,Around the World in Eighty Days,Jules Verne,"Verne, Jules",,,,5,4.10,,Paperback,252,2045,1872,2020/10/05,2020/10/05,,,read,,,,1,0
+1023,The Odyssey,Homer,Homer,,,,4,4.12,,Paperback,541,-556,-700,2020/11/17,2020/11/17,,,read,,,,1,0
+1024,The Iliad,Homer,Homer,,,,4,3.76,,Paperback,683,-572,-750,2020/11/02,2020/11/02,,,read,,,,1,0
+1025,Meditations,Marcus Aurelius,"Aurelius, Marcus",,,,4,3.46,,Paperback,254,316,180,2020/12/21,2020/12/21,,,read,,,,1,0
+1026,The Divine Comedy,Dante Alighieri,"Alighieri, Dante",,,,5,3.65,,Hardcover,798,1470,1320,2021/01/12,2021/01/12,,,read,,,,1,0
+1027,Hamlet,William Shakespeare,"Shakespeare, William",,,,3,3.57,,Mass Market Paperback,289,1752,1601,2021/02/27,2021/02/27,,,read,,,,1,0
+1028,Macbeth,William Shakespeare,"Shakespeare, William",,,,4,4.22,,Mass Market Paperback,249,1776,1606,2021/03/28,2021/03/28,,,read,,,,1,0
+1029,Little Women,Louisa May Alcott,"Alcott, Louisa May",,,,5,3.82,,Paperback,449,2013,1868,2021/04/01,2021/04/01,,,read,,,,1,0
+1030,Adventures of Huckleberry Finn,Mark Twain,"Twain, Mark",,,,4,3.55,,Paperback,327,2006,1884,2021/05/09,2021/05/09,,,read,,,,1,0
+1031,The Scarlet Letter,Nathaniel Hawthorne,"Hawthorne, Nathaniel",,,,4,4.06,,Paperback,279,1951,1850,2021/06/02,2021/06/02,,,read,,,,1,0
+1032,Walden,Henry David Thoreau,"Thoreau, Henry David",,,,5,3.58,,Paperback,352,1990,1854,2021/07/17,2021/07/17,,,read,,,,1,0
+1033,Leaves of Grass,Walt Whitman,"Whitman, Walt",,,,4,3.82,,Hardcover,624,2002,1855,2021/08/01,2021/08/01,,,read,,,,1,0
+1034,The Great Gatsby,F. Scott Fitzgerald,"Fitzgerald, F. Scott",,,,4,4.09,,Paperback,180,2003,1925,2021/09/05,2021/09/05,,,read,,,,1,0
+1035,Ulysses,James Joyce,"Joyce, James",,,,5,4.05,,Paperback,783,2003,1922,2021/10/21,2021/10/21,,,read,,,,1,0
+1036,Mrs. Dalloway,Virginia Woolf,"Woolf, Virginia",,,,4,4.30,,Paperback,194,2003,1925,2021/11/08,2021/11/08,,,read,,,,1,0
+1037,The Metamorphosis,Franz Kafka,"Kafka, Franz",,,,4,3.80,,Paperback,201,2003,1915,2021/12/17,2021/12/17,,,read,,,,1,0
+1038,The Trial,Franz Kafka,"Kafka, Franz",,,,4,4.03,,Paperback,255,2003,1925,2022/01/06,2022/01/06,,,read,,,,1,0
+1039,Heart of Darkness,Joseph Conrad,"Conrad, Joseph",,,,4,3.47,,Paperback,188,2025,1899,2022/01/21,2022/01/21,,,read,,,,1,0
+1040,The Call of the Wild,Jack London,"London, Jack",,,,4,3.51,,Mass Market Paperback,172,2003,1903,2022/02/05,2022/02/05,,,read,,,,1,0
+1041,"Anne of Green Gables (Anne of Green Gables, #1)",L.M. Montgomery,"Montgomery, L.M.",,,,3,3.40,,Paperback,320,2003,1908,2022/03/20,2022/03/20,,,read,,,,1,0
+1042,The Secret Garden,Frances Hodgson Burnett,"Burnett, Frances Hodgson",,,,5,3.50,,Hardcover,331,2003,1911,2022/04/13,2022/04/13,,,read,,,,1,0
+1043,Alice's Adventures in Wonderland,Lewis Carroll,"Carroll, Lewis",,,,5,3.43,,Hardcover,239,1991,1865,2022/05/20,2022/05/20,,,read,,,,1,0
+1044,"The Wonderful Wizard of Oz (Oz, #1)",L. Frank Baum,"Baum, L. Frank",,,,4,4.03,,Hardcover,154,2003,1900,2022/06/28,2022/06/28,,,read,,,,1,0
+1045,Peter Pan,J.M. Barrie,"Barrie, J.M.",,,,5,3.76,,Paperback,176,2003,1911,2022/07/06,2022/07/06,,,read,,,,1,0
+1046,Middlemarch,George Eliot,"Eliot, George",,,,3,4.25,,Paperback,904,2030,1871,2022/08/25,2022/08/25,,,read,,,,1,0
+1047,Emma,Jane Austen,"Austen, Jane",,,,4,3.71,,Paperback,474,1933,1815,2022/09/11,2022/09/11,,,read,,,,1,0
+1048,Sense and Sensibility,Jane Austen,"Austen, Jane",,,,5,3.74,,Paperback,409,1944,1811,2022/10/01,2022/10/01,,,read,,,,1,0
+1049,Persuasion,Jane Austen,"Austen, Jane",,,,5,3.56,,Paperback,249,1919,1817,2022/11/15,2022/11/15,,,read,,,,1,0
+1050,Tess of the D'Urbervilles,Thomas Hardy,"Hardy, Thomas",,,,5,3.76,,Paperback,518,2060,1891,2022/12/12,2022/12/12,,,read,,,,1,0
+1051,Far From the Madding Crowd,Thomas Hardy,"Hardy, Thomas",,,,5,3.70,,Paperback,433,1985,1874,2022/12/25,2022/12/25,,,read,,,,1,0
+1052,The Three Musketeers,Alexandre Dumas,"Dumas, Alexandre",,,,5,3.77,,Paperback,625,1965,1844,2023/01/24,2023/01/24,,,read,,,,1,0
+1053,Madame Bovary,Gustave Flaubert,"Flaubert, Gustave",,,,4,3.93,,Paperback,329,2021,1857,2023/02/02,2023/02/02,,,read,,,,1,0
+1054,The Hunchback of Notre-Dame,Victor Hugo,"Hugo, Victor",,,,5,3.62,,Paperback,510,1955,1831,2023/03/07,2023/03/07,,,read,,,,1,0
+1055,Candide,Voltaire,Voltaire,,,,4,4.14,,Paperback,129,1888,1759,2023/04/06,2023/04/06,,,read,,,,1,0
+1056,Gulliver's Travels,Jonathan Swift,"Swift, Jonathan",,,,5,3.89,,Paperback,306,1829,1726,2023/05/02,2023/05/02,,,read,,,,1,0
+1057,Robinson Crusoe,Daniel Defoe,"Defoe, Daniel",,,,4,3.87,,Paperback,320,1843,1719,2023/05/15,2023/05/15,,,read,,,,1,0
+1058,Paradise Lost,John Milton,"Milton, John",,,,4,4.21,,Paperback,453,1811,1667,2023/07/21,2023/07/21,,,read,,,,1,0
+1059,The Canterbury Tales,Geoffrey Chaucer,"Chaucer, Geoffrey",,,,3,3.62,,Paperback,504,1529,1400,2023/08/28,2023/08/28,,,read,,,,1,0
+1060,Beowulf,Unknown,Unknown,,,,4,3.74,,Paperback,245,1161,1000,2023/09/14,2023/09/14,,,read,,,,1,0
+1061,The Art of War,Sun Tzu,"Tzu, Sun",,,,4,4.31,,Hardcover,273,-356,-500,2023/09/26,2023/09/26,,,read,,,,1,0
+1062,The Prince,Niccolò Machiavelli,"Machiavelli, Niccolò",,,,5,3.52,,Paperback,140,1681,1532,2023/10/15,2023/10/15,,,read,,,,1,0
+1063,On the Origin of Species,Charles Darwin,"Darwin, Charles",,,,4,4.29,,Paperback,703,2014,1859,2023/11/11,2023/11/11,,,read,,,,1,0
+1064,The Republic,Plato,Plato,,,,3,4.20,,Paperback,416,-225,-375,2023/12/16,2023/12/16,,,read,,,,1,0
+1065,Uncle Tom's Cabin,Harriet Beecher Stowe,"Stowe, Harriet Beecher",,,,4,4.14,,Paperback,438,1962,1852,2024/01/28,2024/01/28,,,read,,,,1,0
+1066,The Jungle Book,Rudyard Kipling,"Kipling, Rudyard",,,,4,4.39,,Hardcover,277,1997,1894,2024/02/22,2024/02/22,,,read,,,,1,0
+1067,Kim,Rudyard Kipling,"Kipling, Rudyard",,,,5,4.30,,Paperback,366,2003,1901,2024/03/15,2024/03/15,,,read,,,,1,0
+1068,A Christmas Carol,Charles Dickens,"Dickens, Charles",,,,5,4.23,,Hardcover,184,2003,1843,2024/03/08,2024/03/08,,,read,,,,1,0
+1069,Oliver Twist,Charles Dickens,"Dickens, Charles",,,,4,3.95,,Paperback,608,1954,1838,2024/05/14,2024/05/14,,,read,,,,1,0
+1070,David Copperfield,Charles Dickens,"Dickens, Charles",,,,3,4.20,,Paperback,882,1963,1850,2024/05/27,2024/05/27,,,read,,,,1,0
+1071,Bleak House,Charles Dickens,"Dickens, Charles",,,,5,4.33,,Paperback,1017,2008,1853,2024/06/16,2024/06/16,,,read,,,,1,0
+1072,The Idiot,Fyodor Dostoevsky,"Dostoevsky, Fyodor",,,,4,3.43,,Paperback,667,1996,1869,2024/07/12,2024/07/12,,,read,,,,1,0
+1073,Notes from Underground,Fyodor Dostoevsky,"Dostoevsky, Fyodor",,,,5,3.64,,Paperback,136,2039,1864,2024/08/14,2024/08/14,,,read,,,,1,0
+1074,Dead Souls,Nikolai Gogol,"Gogol, Nikolai",,,,4,3.94,,Paperback,464,1958,1842,2024/09/18,2024/09/18,,,read,,,,1,0
+1075,Fathers and Sons,Ivan Turgenev,"Turgenev, Ivan",,,,5,3.75,,Paperback,244,2020,1862,2024/10/05,2024/10/05,,,read,,,,1,0
+1076,The Age of Innocence,Edith Wharton,"Wharton, Edith",,,,4,4.23,,Paperback,293,2003,1920,2024/11/22,2024/11/22,,,read,,,,1,0
+1077,My Ántonia,Willa Cather,"Cather, Willa",,,,4,3.93,,Paperback,232,2003,1918,2025/01/09,2025/01/09,,,read,,,,1,0
+1078,The Awakening,Kate Chopin,"Chopin, Kate",,,,5,3.42,,Paperback,195,2055,1899,2025/02/26,2025/02/26,,,read,,,,1,0
+1079,Sister Carrie,Theodore Dreiser,"Dreiser, Theodore",,,,5,3.40,,Paperback,580,2003,1900,2025/03/21,2025/03/21,,,read,,,,1,0
+1080,The Wind in the Willows,Kenneth Grahame,"Grahame, Kenneth",,,,4,3.54,,Hardcover,197,2003,1908,2025/04/14,2025/04/14,,,read,,,,1,0
+1081,Dubliners,James Joyce,"Joyce, James",,,,5,3.46,,Paperback,207,2003,1914,2025/04/05,2025/04/05,,,read,,,,1,0
+1082,The Importance of Being Earnest,Oscar Wilde,"Wilde, Oscar",,,,5,3.96,,Paperback,76,2008,1895,2025/06/22,2025/06/22,,,read,,,,1,0
+1083,"Swann's Way (In Search of Lost Time, #1)",Marcel Proust,"Proust, Marcel",,,,4,3.59,,Paperback,615,2003,1913,2025/06/09,2025/06/09,,,read,,,,1,0
+1084,"The Mysterious Affair at Styles (Hercule Poirot, #1)",Agatha Christie,"Christie, Agatha",,,,3,3.91,,Mass Market Paperback,208,2003,1920,2025/07/23,2025/07/23,,,read,,,,1,0
+1085,Siddhartha,Hermann Hesse,"Hesse, Hermann",,,,3,3.84,,Paperback,152,2003,1922,2025/07/08,2025/07/08,,,read,,,,1,0
+1086,The Phantom of the Opera,Gaston Leroux,"Leroux, Gaston",,,,5,3.91,,Mass Market Paperback,360,2003,1909,2025/08/24,2025/08/24,,,read,,,,1,0
+1087,The Strange Case of Dr. Jekyll and Mr. Hyde,Robert Louis Stevenson,"Stevenson, Robert Louis",,,,4,3.91,,Paperback,144,2047,1886,2025/09/25,2025/09/25,,,read,,,,1,0
+1088,Sons and Lovers,D.H. Lawrence,"Lawrence, D.H.",,,,4,4.10,,Paperback,654,2003,1913,2025/11/13,2025/11/13,,,read,,,,1,0
+1089,"The Thirty-Nine Steps (Richard Hannay, #1)",John Buchan,"Buchan, John",,,,5,4.29,,Paperback,100,2003,1915,2025/12/13,2025/12/13,,,read,,,,1,0
+1090,The Mill on the Floss,George Eliot,"Eliot, George",,,,0,4.24,,Paperback,579,1977,1860,,2026/01/08,currently-reading,,currently-reading,,,,0,0
+1091,The Magic Mountain,Thomas Mann,"Mann, Thomas",,,,0,3.52,,Paperback,706,2003,1924,,2026/02/18,to-read,,to-read,,,,0,0
+1092,Vanity Fair,William Makepeace Thackeray,"Thackeray, William Makepeace",,,,0,3.72,,Paperback,867,1978,1848,,2026/03/02,to-read,,to-read,,,,0,0
+1093,The Portrait of a Lady,Henry James,"James, Henry",,,,0,3.47,,Paperback,656,2019,1881,,2026/05/13,to-read,,to-read,,,,0,0
