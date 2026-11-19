@@ -1145,11 +1145,8 @@ export class BookshelfView {
     this.frame++;
   }
 
-  /**
-   * Render at full size and return a PNG blob. longEdge is the longer side in pixels.
-   * decorate(ctx, width, height), if given, draws over the finished picture.
-   */
-  async exportImage(longEdge, frames = 128, onProgress = () => {}, decorate = null) {
+  /** Render at full size and return a PNG blob. longEdge is the longer side in pixels. */
+  async exportImage(longEdge, frames = 128, onProgress = () => {}) {
     const limit = this.renderer.capabilities.maxTextureSize;
     longEdge = Math.min(longEdge, limit);
     const width = this.aspect >= 1 ? longEdge : Math.round(longEdge * this.aspect);
@@ -1167,17 +1164,7 @@ export class BookshelfView {
           await new Promise((resolve) => setTimeout(resolve, 0));
         }
       }
-      // Copy to an ordinary canvas so the caller can draw on top (the credit line).
-      let source = this.canvas;
-      if (decorate) {
-        source = document.createElement('canvas');
-        source.width = width;
-        source.height = height;
-        const ctx = source.getContext('2d');
-        ctx.drawImage(this.canvas, 0, 0);
-        decorate(ctx, width, height);
-      }
-      const blob = await new Promise((resolve) => source.toBlob(resolve, 'image/png'));
+      const blob = await new Promise((resolve) => this.canvas.toBlob(resolve, 'image/png'));
       if (!blob) throw new Error('The browser could not create the image. Try a smaller size.');
       return { blob, width, height };
     } finally {

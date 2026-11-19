@@ -13,7 +13,7 @@ const el = {
   shelf: $('shelf'), year: $('year'), limit: $('limit'), sort: $('sort'), reverse: $('reverse'),
   shape: $('shape'), style: $('style'), rows: $('rows'), palette: $('palette'), colorBy: $('color-by'),
   ratings: $('ratings'), ratingsHelp: $('ratings-help'),
-  picture: $('picture'), credit: $('credit'), tvFields: $('tv-fields'), tvSize: $('tv-size'), tvRes: $('tv-res'),
+  picture: $('picture'), tvFields: $('tv-fields'), tvSize: $('tv-size'), tvRes: $('tv-res'),
   scene: $('scene'), wallType: $('wall-type'), wall: $('wall'), wood: $('wood'), lighting: $('lighting'),
   thickness: $('thickness'), seed: $('seed'), shuffle: $('shuffle'),
   titles: $('titles'), authors: $('authors'), shorten: $('shorten'), leaning: $('leaning'), stacks: $('stacks'),
@@ -52,8 +52,6 @@ function showError(message) {
   el.error.hidden = !message;
 }
 
-// Where the pictures point back to: this page's own address, wherever it is hosted.
-const CREDIT = `Make yours at ${(location.host + location.pathname).replace(/index\.html$/, '').replace(/\/$/, '')}`;
 const VIEWING_DISTANCE = 2.5;       // metres from the sofa to the TV, for life-size pictures
 
 /** The picture's shape. For a TV background also the screen's real size, so books can be drawn life size. */
@@ -111,17 +109,7 @@ function resizePreview() {
   const shown = el.canvas.clientWidth || 800;
   const scale = Math.min(window.devicePixelRatio || 1, 2);
   view.setRenderSize(shown * scale, (shown * scale) / aspect);
-  el.credit.style.fontSize = `${Math.max(7, creditSize(shown, shown / aspect))}px`;
 }
-
-/** Height of the credit line's lettering for a picture of this size. */
-const creditSize = (width, height) => Math.sqrt(width * height) * 0.016;
-
-/** Light lettering on a dark wall, dark on a light one. */
-const darkCredit = () => {
-  const [r, g, b] = hexToRgb(el.wall.value.slice(1));
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.5;
-};
 
 /**
  * Life-size TV picture: the shelves are as wide and as many as the screen is big, so keep only
@@ -204,8 +192,6 @@ function rebuild() {
   else plan = planLayout(books, opts, props, opts.aspect);
   resizePreview();
   view.build(plan, opts);
-  el.credit.textContent = CREDIT;
-  el.credit.classList.toggle('dark', darkCredit());
   const noun = total === 1 ? 'book' : 'books';
   const shelves = plan.rows === 1 ? 'shelf' : 'shelves';
   el.status.textContent = opts.tv
@@ -269,14 +255,6 @@ async function download() {
     const longEdge = tv ? tv.pxW : parseInt(el.size.value, 10);
     const { blob, width, height } = await view.exportImage(longEdge, 128, (done) => {
       el.download.textContent = `Rendering ${Math.round(done * 100)}%`;
-    }, (ctx, w, h) => {
-      // The credit line, bottom right, matching the one shown on the page.
-      const size = creditSize(w, h);
-      ctx.font = `500 ${size}px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'alphabetic';
-      ctx.fillStyle = darkCredit() ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.62)';
-      ctx.fillText(CREDIT, w * 0.988, h * 0.984 - size * 0.15);
     });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);

@@ -65,18 +65,6 @@ body {
   height: auto;
   aspect-ratio: var(--aspect);
 }
-/* The same credit line is drawn into every downloaded picture. */
-.credit {
-  position: absolute;
-  right: 1.2%;
-  bottom: 1.6%;
-  font: 500 12px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  letter-spacing: 0.02em;
-  color: rgba(255, 255, 255, 0.62);
-  pointer-events: none;
-  white-space: nowrap;
-}
-.credit.dark { color: rgba(0, 0, 0, 0.5); }
 .overlay {
   position: absolute;
   inset: 0;
