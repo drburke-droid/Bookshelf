@@ -747,7 +747,9 @@ export class BookshelfView {
   }
 
   propList() {
-    return [...this.props.entries()].map(([name, p]) => ({ name, w: p.w, d: p.d, h: p.h }));
+    // Sorted, so the same list and settings always give the same shelf whatever order the files arrived in.
+    return [...this.props.entries()].sort(([a], [b]) => a.localeCompare(b))
+      .map(([name, p]) => ({ name, w: p.w, d: p.d, h: p.h }));
   }
 
   /** A wood material pulled towards the given sRGB colour; paint (no grain) when grain is false. */
@@ -780,7 +782,8 @@ export class BookshelfView {
   /**
    * Rebuild everything from a layout plan.
    * opts: {style, titles, authors, wallType, wall:[r,g,b] sRGB, wood, lighting, aspect,
-   *        ratings: 'off'|'shelves'|'stars'}
+   *        ratings: 'off'|'shelves'|'stars',
+   *        tv: {width, height, distance} in metres for a life-size picture, or null}
    */
   build(plan, opts) {
     this.disposeContent();
@@ -805,8 +808,10 @@ export class BookshelfView {
     const boards = new Buffers();
     const along = { grain: 0 };
     const upright = { grain: 1 };
+    // On a life-size TV picture, floating shelves run on past both edges of the screen.
+    const drawnW = opts.tv && !bookcase ? opts.tv.width + 1 : boardW;
     for (const y of rowY) {
-      boards.box(identity, -boardW / 2, boardW / 2, y - SHELF_THICK, y, 0, SHELF_DEPTH, null, along, 0.0025);
+      boards.box(identity, -drawnW / 2, drawnW / 2, y - SHELF_THICK, y, 0, SHELF_DEPTH, null, along, 0.0025);
     }
     if (bookcase) {
       boards.box(identity, -boardW / 2 - side, -boardW / 2, bottomY, topY + side, 0, SHELF_DEPTH, null, upright);
@@ -944,11 +949,16 @@ export class BookshelfView {
     let tanV = tanH / this.aspect;
     if (this.aspect < 1) { tanV = 18 / 50; tanH = tanV * this.aspect; }
     const distance = Math.max((blockW / 2) * 1.12 / tanH, (blockH / 2) * 1.12 / tanV);
+    // Life size: the picture is a window exactly the size of the screen, placed at the spines and
+    // seen from a normal sitting distance. Otherwise the camera backs off until everything fits.
+    const eye = opts.tv ? opts.tv.distance : distance;
+    const windowZ = opts.tv ? SHELF_DEPTH - 0.018 : SHELF_DEPTH;
+    if (opts.tv) tanV = opts.tv.height / 2 / eye;
     this.camera.fov = (2 * Math.atan(tanV) * 180) / Math.PI;
     this.camera.aspect = this.aspect;
-    this.camera.near = distance * 0.3;
-    this.camera.far = distance * 2 + 5;
-    this.camera.position.set(0, centreY, SHELF_DEPTH + distance);
+    this.camera.near = eye * 0.3;
+    this.camera.far = eye * 2 + 5;
+    this.camera.position.set(0, centreY, windowZ + eye);
     this.camera.lookAt(0, centreY, 0);
 
     // Wall
@@ -1135,8 +1145,11 @@ export class BookshelfView {
     this.frame++;
   }
 
-  /** Render at full size and return a PNG blob. longEdge is the longer side in pixels. */
-  async exportImage(longEdge, frames = 128, onProgress = () => {}) {
+  /**
+   * Render at full size and return a PNG blob. longEdge is the longer side in pixels.
+   * decorate(ctx, width, height), if given, draws over the finished picture.
+   */
+  async exportImage(longEdge, frames = 128, onProgress = () => {}, decorate = null) {
     const limit = this.renderer.capabilities.maxTextureSize;
     longEdge = Math.min(longEdge, limit);
     const width = this.aspect >= 1 ? longEdge : Math.round(longEdge * this.aspect);
@@ -1154,7 +1167,17 @@ export class BookshelfView {
           await new Promise((resolve) => setTimeout(resolve, 0));
         }
       }
-      const blob = await new Promise((resolve) => this.canvas.toBlob(resolve, 'image/png'));
+      // Copy to an ordinary canvas so the caller can draw on top (the credit line).
+      let source = this.canvas;
+      if (decorate) {
+        source = document.createElement('canvas');
+        source.width = width;
+        source.height = height;
+        const ctx = source.getContext('2d');
+        ctx.drawImage(this.canvas, 0, 0);
+        decorate(ctx, width, height);
+      }
+      const blob = await new Promise((resolve) => source.toBlob(resolve, 'image/png'));
       if (!blob) throw new Error('The browser could not create the image. Try a smaller size.');
       return { blob, width, height };
     } finally {

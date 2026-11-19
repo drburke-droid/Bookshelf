@@ -53,14 +53,30 @@ body {
   border-radius: var(--radius);
   overflow: hidden;
 }
-#canvas {
+.picture {
   --aspect: 1.7778;                 /* set from the Picture shape setting */
   --room: calc(100vh - 150px);      /* height available for the picture */
-  display: block;
+  position: relative;
   width: min(100%, calc(var(--room) * var(--aspect)));
+}
+#canvas {
+  display: block;
+  width: 100%;
   height: auto;
   aspect-ratio: var(--aspect);
 }
+/* The same credit line is drawn into every downloaded picture. */
+.credit {
+  position: absolute;
+  right: 1.2%;
+  bottom: 1.6%;
+  font: 500 12px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.62);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.credit.dark { color: rgba(0, 0, 0, 0.5); }
 .overlay {
   position: absolute;
   inset: 0;
@@ -146,6 +162,8 @@ button { cursor: pointer; width: auto; }
 .pair { display: flex; gap: 8px; min-width: 0; }
 .pair input[type="number"] { width: 64px; flex: none; }
 .pair button { flex: 1; min-width: 0; padding-inline: 6px; white-space: nowrap; }
+.unit { align-self: center; color: var(--muted); font-size: 13px; }
+.download select[hidden] { display: none; }
 button:hover, select:hover { border-color: var(--accent); }
 input[type="color"] {
   width: 100%;
@@ -202,7 +220,7 @@ a { color: var(--accent); }
   .layout { grid-template-columns: minmax(0, 1fr); padding: 8px 16px 28px; }
   .top { padding: 14px 16px 4px; }
   .stage { position: static; }
-  #canvas { --room: 70vh; }
+  .picture { --room: 70vh; }
   .download { width: 100%; }
   .download select, .download .primary { flex: 1; }
 }

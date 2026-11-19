@@ -20,7 +20,10 @@
   <main class="layout">
     <section class="stage" aria-label="Your bookshelf">
       <div class="frame" id="frame">
-        <canvas id="canvas" aria-label="Picture of the bookshelf"></canvas>
+        <div class="picture" id="picture">
+          <canvas id="canvas" aria-label="Picture of the bookshelf"></canvas>
+          <span class="credit" id="credit" aria-hidden="true"></span>
+        </div>
         <div class="overlay" id="overlay" hidden></div>
       </div>
       <div class="stage-bar">
@@ -106,7 +109,24 @@
             <option value="1">Square</option>
             <option value="0.8">Portrait (4:5)</option>
             <option value="0.5625">Phone (9:16)</option>
+            <option value="tv">TV, life size</option>
           </select></div>
+        <div id="tv-fields" hidden>
+          <div class="field"><label for="tv-size">Screen diagonal</label>
+            <span class="pair"><input id="tv-size" type="number" min="20" max="120" step="1" value="55" inputmode="numeric">
+              <span class="unit">inches</span></span></div>
+          <div class="field"><label for="tv-res">Resolution</label>
+            <select id="tv-res">
+              <option value="1280x720">HD (1280 x 720)</option>
+              <option value="1920x1080">Full HD (1920 x 1080)</option>
+              <option value="2560x1440">QHD (2560 x 1440)</option>
+              <option value="3840x2160" selected>4K (3840 x 2160)</option>
+              <option value="7680x4320">8K (7680 x 4320)</option>
+            </select></div>
+          <p class="hint" id="tv-help">Books are drawn at their real size for a screen this big, so only
+            your top-rated books that fit are shown. Download the picture and show it with your TV's
+            photo, art or ambient mode.</p>
+        </div>
         <div class="field"><label for="style">Style</label>
           <select id="style">
             <option value="floating">Floating shelves</option>

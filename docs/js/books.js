@@ -11,6 +11,7 @@ export const BOOK_GAP = 0.0006;
 export const MIN_SHELF_W = 0.50;
 export const ROW_SLACK = 0.07;
 export const BASE_Y = 0.80;
+export const ROW_PITCH = MAX_BOOK_H + ROW_HEADROOM + SHELF_THICK;   // height taken by one shelf of books
 
 export const PALETTES = {
   classic: ['3d2a55', '5a3a5e', '2e2f5e', '2f4a35', '5b6238', '2c5557', '1f2d4a', '4a4f5c',
@@ -306,11 +307,12 @@ const runWidth = (run) => run.reduce((sum, b) => sum + b.t + BOOK_GAP, 0);
  * Decide where every book and decoration goes.
  * props: [{name, w, d, h}] decorations that may be used. aspect: picture width / height.
  * opts.groups (optional): [{label, books}] to give each group its own shelves, in that order.
+ * opts.shelfW (optional): use exactly this shelf width; the result's overfull flag says if the books don't fit.
  * Returns {rows, shelfW, pitch, clearH, placements, rowLabels}.
  */
 export function planLayout(books, opts, props, aspect) {
   const rng = new Rng(opts.seed * 104729 + 17);
-  const pitch = MAX_BOOK_H + ROW_HEADROOM + SHELF_THICK;
+  const pitch = ROW_PITCH;
   const clearH = pitch - SHELF_THICK;
   const totalW = runWidth(books);
   const meanT = totalW / Math.max(books.length, 1);
@@ -444,7 +446,9 @@ export function planLayout(books, opts, props, aspect) {
   });
 
   const content = rowSegments.map(({ segs }) => segs.reduce((s, seg) => s + seg.w, 0));
-  const shelfW = Math.max(MIN_SHELF_W, Math.max(...content) / (1 - ROW_SLACK));
+  // A fixed shelf width (life-size TV picture) may turn out too short for these books: say so.
+  const shelfW = opts.shelfW || Math.max(MIN_SHELF_W, Math.max(...content) / (1 - ROW_SLACK));
+  const overfull = Boolean(opts.shelfW) && Math.max(...content) > opts.shelfW - 0.02;
 
   const placements = [];
   rowSegments.forEach(({ segs, endGap }, r) => {
@@ -529,7 +533,7 @@ export function planLayout(books, opts, props, aspect) {
     });
   });
 
-  return { rows: nRows, shelfW, pitch, clearH, placements, rowLabels: groupRows ? rowLabels : null };
+  return { rows: nRows, shelfW, pitch, clearH, placements, rowLabels: groupRows ? rowLabels : null, overfull };
 }
 
 /** Break words into n lines so the longest line is as short as possible. */

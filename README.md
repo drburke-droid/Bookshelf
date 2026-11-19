@@ -29,7 +29,13 @@ Once Pages is switched on (see below) it is at <https://drburke-droid.github.io/
    - *Top rated on the top shelf* puts five-star books on the top shelf, then four, and so on, and
      labels every shelf.
    - *Stars on spines* prints each book's stars, small, at the foot of its spine.
-6. Click **Download picture**.
+6. Click **Download picture**. Each picture carries a small "Make yours at ..." line in the corner
+   with the site's address.
+
+**As a TV background.** Set *Picture shape* to *TV, life size* and enter your screen's diagonal
+and resolution. The books are then drawn at their real size for that screen, on as many
+shelves as it has room for, so only your top-rated books that fit are shown (most recently read
+first among equals). Download it and show it with the TV's photo, art or ambient mode.
 
 To switch the site on: in the repository on GitHub go to *Settings → Pages*, set **Source** to
 *Deploy from a branch*, choose the `main` branch and the `/docs` folder, and save.

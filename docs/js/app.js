@@ -1,5 +1,7 @@
 // Page wiring: file upload, settings, and keeping the picture up to date.
-import { readBooks, assignLooks, sortBooks, planLayout, hexToRgb } from './books.js';
+import {
+  readBooks, assignLooks, sortBooks, planLayout, hexToRgb, ROW_PITCH, ROW_SLACK, SHELF_END_MARGIN, BOOK_GAP,
+} from './books.js';
 import { BookshelfView } from './scene.js';
 import { SCENES, WALLS, WOODS, LIGHTING } from './scenes.js';
 
@@ -11,6 +13,7 @@ const el = {
   shelf: $('shelf'), year: $('year'), limit: $('limit'), sort: $('sort'), reverse: $('reverse'),
   shape: $('shape'), style: $('style'), rows: $('rows'), palette: $('palette'), colorBy: $('color-by'),
   ratings: $('ratings'), ratingsHelp: $('ratings-help'),
+  picture: $('picture'), credit: $('credit'), tvFields: $('tv-fields'), tvSize: $('tv-size'), tvRes: $('tv-res'),
   scene: $('scene'), wallType: $('wall-type'), wall: $('wall'), wood: $('wood'), lighting: $('lighting'),
   thickness: $('thickness'), seed: $('seed'), shuffle: $('shuffle'),
   titles: $('titles'), authors: $('authors'), shorten: $('shorten'), leaning: $('leaning'), stacks: $('stacks'),
@@ -49,6 +52,20 @@ function showError(message) {
   el.error.hidden = !message;
 }
 
+// Where the pictures point back to: this page's own address, wherever it is hosted.
+const CREDIT = `Make yours at ${(location.host + location.pathname).replace(/index\.html$/, '').replace(/\/$/, '')}`;
+const VIEWING_DISTANCE = 2.5;       // metres from the sofa to the TV, for life-size pictures
+
+/** The picture's shape. For a TV background also the screen's real size, so books can be drawn life size. */
+function pictureShape() {
+  if (el.shape.value !== 'tv') return { aspect: parseFloat(el.shape.value), tv: null };
+  const [pxW, pxH] = el.tvRes.value.split('x').map(Number);
+  const aspect = pxW / pxH;
+  const inches = Math.min(Math.max(parseFloat(el.tvSize.value) || 55, 20), 120);
+  const height = (inches * 0.0254) / Math.hypot(aspect, 1);
+  return { aspect, tv: { width: height * aspect, height, distance: VIEWING_DISTANCE, pxW, pxH, inches } };
+}
+
 function settings() {
   return {
     shelf: el.shelf.value,
@@ -56,7 +73,8 @@ function settings() {
     limit: Math.max(0, parseInt(el.limit.value, 10) || 0),
     sort: el.sort.value,
     reverse: el.reverse.checked,
-    aspect: parseFloat(el.shape.value),
+    aspect: pictureShape().aspect,
+    tv: pictureShape().tv,
     style: el.style.value,
     rows: parseInt(el.rows.value, 10) || 0,
     palette: el.palette.value,
@@ -88,11 +106,50 @@ function fillYears(years) {
 
 function resizePreview() {
   if (!view) return;
-  const aspect = parseFloat(el.shape.value);
-  el.canvas.style.setProperty('--aspect', String(aspect));
+  const { aspect } = pictureShape();
+  el.picture.style.setProperty('--aspect', String(aspect));
   const shown = el.canvas.clientWidth || 800;
   const scale = Math.min(window.devicePixelRatio || 1, 2);
   view.setRenderSize(shown * scale, (shown * scale) / aspect);
+  el.credit.style.fontSize = `${Math.max(7, creditSize(shown, shown / aspect))}px`;
+}
+
+/** Height of the credit line's lettering for a picture of this size. */
+const creditSize = (width, height) => Math.sqrt(width * height) * 0.016;
+
+/** Light lettering on a dark wall, dark on a light one. */
+const darkCredit = () => {
+  const [r, g, b] = hexToRgb(el.wall.value.slice(1));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.5;
+};
+
+/**
+ * Life-size TV picture: the shelves are as wide and as many as the screen is big, so keep only
+ * the best books that fit. Best = highest rated, then most recently read.
+ */
+function fitToScreen(books, opts, props) {
+  const { tv } = opts;
+  const side = opts.style === 'bookcase' ? 0.025 : 0;
+  const rows = Math.max(1, Math.floor((tv.height - 0.02 - side) / ROW_PITCH));
+  const shelfW = opts.style === 'bookcase'
+    ? tv.width - 0.05 - 2 * side - 2 * SHELF_END_MARGIN
+    : tv.width - 0.03;
+  const ranked = books.slice().sort((a, b) => b.stars - a.stars || b.dateKey - a.dateKey || a.index - b.index);
+  // First guess from the shelf space, then drop the lowest-ranked books until the layout really fits.
+  let count = 0;
+  let width = 0;
+  while (count < ranked.length && width + ranked[count].t + BOOK_GAP <= rows * shelfW * (1 - ROW_SLACK)) {
+    width += ranked[count].t + BOOK_GAP;
+    count++;
+  }
+  count = Math.max(count, 1);
+  for (;;) {
+    const keep = new Set(ranked.slice(0, count));
+    const chosen = books.filter((b) => keep.has(b));
+    const plan = planLayout(chosen, { ...opts, rows, shelfW, groups: null }, props, opts.aspect);
+    if (!plan.overfull || count <= 1) return { books: chosen, plan };
+    count -= Math.max(1, Math.round(count * 0.03));
+  }
 }
 
 function rebuild() {
@@ -121,6 +178,12 @@ function rebuild() {
   if (opts.limit && books.length > opts.limit) {
     books = opts.sort === 'date' && !opts.reverse ? books.slice(-opts.limit) : books.slice(0, opts.limit);
   }
+  const props = opts.decor ? view.propList() : [];
+  const total = books.length;
+  el.tvFields.hidden = !opts.tv;
+  el.size.hidden = Boolean(opts.tv);          // a TV picture is always made at the TV's own resolution
+  if (opts.tv && opts.ratings === 'shelves') opts.ratings = 'off';     // the screen decides the shelves
+
   // Showing ratings: top-rated books on the top shelf, or stars on the spines.
   if (opts.ratings === 'shelves') {
     opts.groups = [5, 4, 3, 2, 1, 0].map((n) => ({ label: n, books: books.filter((b) => b.stars === n) }));
@@ -131,16 +194,23 @@ function rebuild() {
   };
   let note = notes[opts.ratings] || '';
   if (note && !books.some((b) => b.stars > 0)) note = 'None of these books has a rating in your file.';
+  if (opts.tv && el.ratings.value === 'shelves') note = 'Not used for a TV background: the screen size sets the shelves.';
   el.ratingsHelp.textContent = note;
   el.ratingsHelp.hidden = !note;
-  el.rows.disabled = opts.ratings === 'shelves';
+  el.rows.disabled = opts.ratings === 'shelves' || Boolean(opts.tv);
 
-  const plan = planLayout(books, opts, opts.decor ? view.propList() : [], opts.aspect);
+  let plan;
+  if (opts.tv) ({ books, plan } = fitToScreen(books, opts, props));
+  else plan = planLayout(books, opts, props, opts.aspect);
   resizePreview();
   view.build(plan, opts);
-  const noun = books.length === 1 ? 'book' : 'books';
+  el.credit.textContent = CREDIT;
+  el.credit.classList.toggle('dark', darkCredit());
+  const noun = total === 1 ? 'book' : 'books';
   const shelves = plan.rows === 1 ? 'shelf' : 'shelves';
-  el.status.textContent = `${books.length} ${noun} on ${plan.rows} ${shelves} · ${state.source}`;
+  el.status.textContent = opts.tv
+    ? `${books.length} of ${total} ${noun} at life size on a ${opts.tv.inches}-inch screen · ${state.source}`
+    : `${books.length} ${noun} on ${plan.rows} ${shelves} · ${state.source}`;
 }
 
 let pending = 0;
@@ -195,8 +265,18 @@ async function download() {
   el.download.disabled = true;
   const label = el.download.textContent;
   try {
-    const { blob, width, height } = await view.exportImage(parseInt(el.size.value, 10), 128, (done) => {
+    const { tv } = pictureShape();
+    const longEdge = tv ? tv.pxW : parseInt(el.size.value, 10);
+    const { blob, width, height } = await view.exportImage(longEdge, 128, (done) => {
       el.download.textContent = `Rendering ${Math.round(done * 100)}%`;
+    }, (ctx, w, h) => {
+      // The credit line, bottom right, matching the one shown on the page.
+      const size = creditSize(w, h);
+      ctx.font = `500 ${size}px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = darkCredit() ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.62)';
+      ctx.fillText(CREDIT, w * 0.988, h * 0.984 - size * 0.15);
     });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -223,7 +303,7 @@ el.shuffle.addEventListener('click', () => {
 });
 el.scene.addEventListener('input', () => { applyScene(el.scene.value); scheduleRebuild(); });
 for (const key of ['shelf', 'year', 'limit', 'sort', 'reverse', 'shape', 'style', 'rows', 'palette', 'colorBy',
-  'ratings', 'wallType', 'wall', 'wood', 'lighting', 'thickness', 'seed', 'titles', 'authors', 'shorten', 'leaning', 'stacks',
+  'ratings', 'wallType', 'wall', 'wood', 'lighting', 'tvSize', 'tvRes', 'thickness', 'seed', 'titles', 'authors', 'shorten', 'leaning', 'stacks',
   'decor']) {
   el[key].addEventListener('input', scheduleRebuild);
 }
