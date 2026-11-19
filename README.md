@@ -22,7 +22,10 @@ Once Pages is switched on (see below) it is at <https://drburke-droid.github.io/
 1. Export your library from Goodreads (*My Books → Tools → Import and export → Export Library*).
 2. Choose the CSV on the page, or drop it anywhere on it.
 3. Pick the books, order, colours and picture shape.
-4. Click **Download picture**.
+4. Choose a scene: Classic parlour, Old library, Modern gallery, Cool study, Sunlit room or
+   Evening lamp. Each sets the wall, shelf finish, lighting and colours together, and you can then
+   change any of them on its own.
+5. Click **Download picture**.
 
 To switch the site on: in the repository on GitHub go to *Settings → Pages*, set **Source** to
 *Deploy from a branch*, choose the `main` branch and the `/docs` folder, and save.
@@ -37,7 +40,15 @@ Then open <http://localhost:8000>.
 
 The site draws the shelf with [three.js](https://threejs.org) (MIT licence, included in
 `docs/vendor`). It uses the same layout rules as the Blender script, so both give the same kind of
-shelf, though the exact arrangement differs.
+shelf, though the exact arrangement differs. Scenes, authors on spines and the other finishing
+touches below are on the website only.
+
+What makes the website's picture look less computer-made:
+
+- Spines are curved and carry the author, a publisher's emblem, reading creases and rubbed edges.
+- Covers are cloth, matte or glossy, and books sit very slightly askew.
+- Light comes from sized lamps, spotlights or a window, with soft shadows and reflections.
+- Wallpaper has a sheen and a fine texture; wood panelling has real depth.
 
 ## In Blender
 

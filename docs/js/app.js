@@ -1,6 +1,7 @@
 // Page wiring: file upload, settings, and keeping the picture up to date.
 import { readBooks, assignLooks, sortBooks, planLayout, hexToRgb } from './books.js';
 import { BookshelfView } from './scene.js';
+import { SCENES, WALLS, WOODS, LIGHTING } from './scenes.js';
 
 const $ = (id) => document.getElementById(id);
 const el = {
@@ -9,11 +10,30 @@ const el = {
   download: $('download'), size: $('size'),
   shelf: $('shelf'), year: $('year'), limit: $('limit'), sort: $('sort'), reverse: $('reverse'),
   shape: $('shape'), style: $('style'), rows: $('rows'), palette: $('palette'), colorBy: $('color-by'),
-  wall: $('wall'), pattern: $('pattern'), thickness: $('thickness'), seed: $('seed'), shuffle: $('shuffle'),
-  titles: $('titles'), shorten: $('shorten'), leaning: $('leaning'), stacks: $('stacks'), decor: $('decor'),
+  scene: $('scene'), wallType: $('wall-type'), wall: $('wall'), wood: $('wood'), lighting: $('lighting'),
+  thickness: $('thickness'), seed: $('seed'), shuffle: $('shuffle'),
+  titles: $('titles'), authors: $('authors'), shorten: $('shorten'), leaning: $('leaning'), stacks: $('stacks'),
+  decor: $('decor'),
 };
 
 for (let n = 1; n <= 12; n++) el.rows.add(new Option(String(n), String(n)));
+for (const [key, scene] of Object.entries(SCENES)) el.scene.add(new Option(scene.label, key));
+for (const [key, label] of Object.entries(WALLS)) el.wallType.add(new Option(label, key));
+for (const [key, wood] of Object.entries(WOODS)) el.wood.add(new Option(wood.label, key));
+for (const [key, rig] of Object.entries(LIGHTING)) el.lighting.add(new Option(rig.label, key));
+
+/** Fill in the individual settings from a named scene. */
+function applyScene(key) {
+  const scene = SCENES[key];
+  if (!scene) return;
+  el.wallType.value = scene.wall;
+  el.wall.value = scene.wallColor;
+  el.wood.value = scene.wood;
+  el.lighting.value = scene.lighting;
+  el.style.value = scene.style;
+  el.palette.value = scene.palette;
+}
+applyScene(el.scene.value);
 
 const state = { csv: null, source: '', years: [] };
 let view = null;
@@ -40,11 +60,14 @@ function settings() {
     rows: parseInt(el.rows.value, 10) || 0,
     palette: el.palette.value,
     colorBy: el.colorBy.value,
+    wallType: el.wallType.value,
     wall: hexToRgb(el.wall.value.slice(1)),
-    pattern: el.pattern.checked,
+    wood: el.wood.value,
+    lighting: el.lighting.value,
     thickness: parseFloat(el.thickness.value) || 1,
     seed: Math.max(1, parseInt(el.seed.value, 10) || 1),
     titles: el.titles.checked,
+    authors: el.authors.checked,
     shorten: el.shorten.checked,
     leaning: el.leaning.checked,
     stacks: el.stacks.checked,
@@ -156,7 +179,7 @@ async function download() {
   el.download.disabled = true;
   const label = el.download.textContent;
   try {
-    const { blob, width, height } = await view.exportImage(parseInt(el.size.value, 10), 96, (done) => {
+    const { blob, width, height } = await view.exportImage(parseInt(el.size.value, 10), 128, (done) => {
       el.download.textContent = `Rendering ${Math.round(done * 100)}%`;
     });
     const link = document.createElement('a');
@@ -182,8 +205,10 @@ el.shuffle.addEventListener('click', () => {
   el.seed.value = String(1 + Math.floor(Math.random() * 9999));
   rebuild();
 });
+el.scene.addEventListener('input', () => { applyScene(el.scene.value); scheduleRebuild(); });
 for (const key of ['shelf', 'year', 'limit', 'sort', 'reverse', 'shape', 'style', 'rows', 'palette', 'colorBy',
-  'wall', 'pattern', 'thickness', 'seed', 'titles', 'shorten', 'leaning', 'stacks', 'decor']) {
+  'wallType', 'wall', 'wood', 'lighting', 'thickness', 'seed', 'titles', 'authors', 'shorten', 'leaning', 'stacks',
+  'decor']) {
   el[key].addEventListener('input', scheduleRebuild);
 }
 

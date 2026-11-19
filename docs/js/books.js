@@ -245,6 +245,20 @@ export function assignLooks(books, opts) {
     book.bands = rng.random() < 0.35 && book.t > 0.012;
     book.push = rng.uniform(0, 0.008);
     book.font = rng.int(0, SPINE_FONTS.length - 1);
+
+    // Small differences that stop the shelf looking computer-made.
+    if (book.hard) book.finish = rng.random() < 0.5 ? 'cloth' : 'gloss';
+    else book.finish = rng.random() < 0.6 ? 'matte' : 'gloss';
+    book.caps = rng.random() < 0.3;                          // title set in capitals
+    book.patch = book.hard && book.t > 0.02 && rng.random() < 0.25;   // contrasting title label
+    book.yaw = (rng.uniform(-1.4, 1.4) * Math.PI) / 180;     // not pushed in perfectly square
+    book.roll = (rng.uniform(-0.3, 0.3) * Math.PI) / 180;
+    book.creases = book.hard ? 0 : rng.int(0, 4);            // reading creases on paperbacks
+    book.wear = rng.random();
+    book.mark = rng.int(0, 3);                               // publisher's emblem
+    book.paper = rng.uniform(0.6, 0.78);                     // how yellowed the pages are
+    const names = book.author.replace(/,?\s+(jr|sr|ii|iii|iv)\.?$/i, '').split(/\s+/).filter(Boolean);
+    book.surname = names.length ? names[names.length - 1] : '';
   }
 }
 

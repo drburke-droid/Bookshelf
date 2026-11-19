@@ -89,6 +89,9 @@
 
       <section class="group">
         <h2>3. The look</h2>
+        <div class="field"><label for="scene">Scene</label>
+          <select id="scene" aria-describedby="scene-help"></select></div>
+        <p class="hint" id="scene-help">A scene sets the wall, shelves, lighting and colours together. Change any of them afterwards.</p>
         <div class="field"><label for="shape">Picture shape</label>
           <select id="shape">
             <option value="1.7778">Wide (16:9)</option>
@@ -117,15 +120,21 @@
             <option value="book">Each book</option>
             <option value="author">Author</option>
           </select></div>
-        <div class="field"><label for="wall">Wall</label>
+        <div class="field"><label for="wall-type">Wall</label>
+          <select id="wall-type"></select></div>
+        <div class="field"><label for="wall">Wall colour</label>
           <input id="wall" type="color" value="#42121c"></div>
-        <label class="check"><input id="pattern" type="checkbox" checked> Wallpaper pattern</label>
+        <div class="field"><label for="wood">Shelf finish</label>
+          <select id="wood"></select></div>
+        <div class="field"><label for="lighting">Lighting</label>
+          <select id="lighting"></select></div>
         <div class="field"><label for="thickness">Thickness</label>
           <input id="thickness" type="range" min="0.6" max="1.8" step="0.05" value="1"></div>
         <div class="field"><label for="seed">Variation</label>
           <span class="pair"><input id="seed" type="number" min="1" step="1" value="1" inputmode="numeric">
             <button id="shuffle" type="button">Surprise me</button></span></div>
         <label class="check"><input id="titles" type="checkbox" checked> Titles on spines</label>
+        <label class="check"><input id="authors" type="checkbox" checked> Authors on spines</label>
         <label class="check"><input id="shorten" type="checkbox" checked> Shorten long titles</label>
         <label class="check"><input id="leaning" type="checkbox" checked> Leaning books</label>
         <label class="check"><input id="stacks" type="checkbox" checked> Flat stacks</label>
