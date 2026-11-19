@@ -15,6 +15,8 @@ const PROP_NAMES = ['succulent', 'picture_frame', 'vase', 'elephant', 'bust', 'h
 const FINISHES = { cloth: 0.92, matte: 0.7, gloss: 0.36 };     // surface roughness of each cover finish
 const WOOD_REPEAT = 1 / 1.1;                                   // wood texture repeats per metre
 const MAX_SPOTS = 4;
+const BOOK_REFLECTION = 0.3;
+const BOOK_SHINE = 0.4;         // below 1 so the white glare off paper and cloth doesn't grey the covers
 
 const css = ([r, g, b]) => `rgb(${Math.round(r * 255)},${Math.round(g * 255)},${Math.round(b * 255)})`;
 const toLinear = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
@@ -224,7 +226,7 @@ function drawLabel(ctx, x, y, w, h, book, density, show, flat) {
   ctx.fillRect(x - 1, y - 1, w + 2, h + 2);
 
   // Wear: rubbed top and bottom edges, reading creases on paperbacks, and a little surface grain.
-  const rub = 0.05 + 0.13 * book.wear;
+  const rub = 0.04 + 0.1 * book.wear;
   for (const [from, to] of [[y, y + h * 0.04], [y + h, y + h * 0.96]]) {
     const g = ctx.createLinearGradient(0, from, 0, to);
     g.addColorStop(0, `rgba(255,255,255,${rub})`);
@@ -238,7 +240,7 @@ function drawLabel(ctx, x, y, w, h, book, density, show, flat) {
     ctx.fillRect(x + w * rng.uniform(0.18, 0.82), y + h * rng.uniform(0, 0.12),
       Math.max(1, density * 0.0004), h * rng.uniform(0.7, 1));
   }
-  ctx.globalAlpha = 0.5;
+  ctx.globalAlpha = 0.3;
   ctx.fillStyle = grain(ctx);
   ctx.fillRect(x, y, w, h);
   ctx.globalAlpha = 1;
@@ -601,22 +603,30 @@ export class BookshelfView {
       transparent: true, depthTest: false, depthWrite: false, toneMapped: false,
     });
     this.present = new THREE.ShaderMaterial({
-      uniforms: { tex: { value: null }, vignette: { value: 0.2 } },
+      uniforms: { tex: { value: null }, vignette: { value: 0.2 }, exposure: { value: 1 } },
       vertexShader,
       fragmentShader: [
-        'uniform sampler2D tex; uniform float vignette; varying vec2 vUv;',
+        'uniform sampler2D tex; uniform float vignette; uniform float exposure; varying vec2 vUv;',
         'float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }',
         'void main(){',
-        '  vec3 c = texture2D(tex, vUv).rgb;',
+        '  vec3 c = texture2D(tex, vUv).rgb * exposure;',
         '  vec2 q = vUv - 0.5;',
         '  c *= 1.0 - vignette * smoothstep(0.12, 1.0, dot(q, q) * 2.0);',   // darker towards the corners
+        // Brightness is shown as it is up to a point, then eased towards white. Easing red, green and
+        // blue separately (the usual film-style curve) drains colour from anything brightly lit; working
+        // on brightness alone keeps every cover its own colour.
+        '  float lum = max(dot(c, vec3(0.2126, 0.7152, 0.0722)), 1e-4);',
+        '  float knee = 0.55;',
+        '  float mapped = lum < knee ? lum : knee + (1.0 - knee) * tanh((lum - knee) / (1.0 - knee));',
+        '  c *= mapped / lum;',
+        '  float peak = max(c.r, max(c.g, c.b));',
+        '  if (peak > 1.0) c = mapped + (c - mapped) * ((1.0 - mapped) / max(peak - mapped, 1e-4));',
         '  gl_FragColor = vec4(c, 1.0);',
-        '  #include <tonemapping_fragment>',
         '  #include <colorspace_fragment>',
         '  gl_FragColor.rgb += (hash(gl_FragCoord.xy) - 0.5) / 255.0;',      // hides banding in soft gradients
         '}',
       ].join('\n'),
-      depthTest: false, depthWrite: false,
+      depthTest: false, depthWrite: false, toneMapped: false,
     });
     this.quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.blend);
     this.quad.frustumCulled = false;
@@ -802,14 +812,20 @@ export class BookshelfView {
     }
     for (const [name, buf] of Object.entries(solids)) {
       if (!buf.count) continue;
-      add(new THREE.Mesh(buf.toGeometry(),
-        new THREE.MeshStandardMaterial({ vertexColors: true, roughness: FINISHES[name] || 0.9 })));
+      const material = new THREE.MeshPhysicalMaterial({
+        vertexColors: true, roughness: FINISHES[name] || 0.9, specularIntensity: BOOK_SHINE,
+      });
+      material.userData.book = true;
+      add(new THREE.Mesh(buf.toGeometry(), material));
     }
+
+    this.debugPlacements = bookItems;       // lets tests check how each book ended up on screen
 
     // Spines: artwork drawn on shared textures and wrapped over the curved spine
     const labelItems = bookItems.map((p) => ({ book: p.book, flat: p.kind === 'flat', matrix: p.matrix, profile: p.profile }));
     if (labelItems.length) {
       const canvases = buildLabelAtlases(labelItems, this.maxTexture, { titles: opts.titles, authors: opts.authors });
+      this.debugLabels = { canvases, items: labelItems };      // for tests, like debugPlacements
       canvases.forEach((canvas, page) => {
         const texture = new THREE.CanvasTexture(canvas);
         texture.colorSpace = THREE.SRGBColorSpace;
@@ -821,9 +837,11 @@ export class BookshelfView {
             if (it.page === page && (it.book.finish || 'matte') === name) buf.spine(it.matrix, it.book.h, it.profile, it.uv);
           }
           if (!buf.count) continue;
-          const material = new THREE.MeshStandardMaterial({
-            map: texture, roughness, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+          const material = new THREE.MeshPhysicalMaterial({
+            map: texture, roughness, specularIntensity: BOOK_SHINE,
+            polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
           });
+          material.userData.book = true;
           add(new THREE.Mesh(buf.toGeometry(), material), false);
         }
       });
@@ -942,11 +960,15 @@ export class BookshelfView {
     const peak = Math.max(...lin, 1e-3);
     this.ambient.color.setRGB(...lin.map((c) => 0.55 + 0.45 * (c / peak)));
     this.ambient.intensity = rig.ambient;
-    this.renderer.toneMappingExposure = rig.exposure;
+    this.renderer.toneMappingExposure = rig.exposure;      // used only by the single-frame fallback
+    this.present.uniforms.exposure.value = rig.exposure;
     this.present.uniforms.vignette.value = rig.vignette;
     this.content.traverse((o) => {
       if (!o.isMesh) return;
-      for (const mat of Array.isArray(o.material) ? o.material : [o.material]) mat.envMapIntensity = rig.reflections;
+      for (const mat of Array.isArray(o.material) ? o.material : [o.material]) {
+        // Books get only a little of the room's reflection: more lays a white sheen over the covers.
+        mat.envMapIntensity = rig.reflections * (mat.userData.book ? BOOK_REFLECTION : 1);
+      }
     });
   }
 

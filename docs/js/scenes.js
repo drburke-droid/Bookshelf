@@ -12,7 +12,7 @@ export const SCENES = {
   study: { label: 'Cool study', wall: 'stripe', wallColor: '#2c4654', wood: 'walnut',
     lighting: 'window', style: 'floating', palette: 'classic' },
   sunroom: { label: 'Sunlit room', wall: 'plain', wallColor: '#e3d3b8', wood: 'oak',
-    lighting: 'golden', style: 'floating', palette: 'pastel' },
+    lighting: 'golden', style: 'floating', palette: 'classic' },
   evening: { label: 'Evening lamp', wall: 'damask', wallColor: '#17332f', wood: 'walnut',
     lighting: 'lamp', style: 'floating', palette: 'classic' },
 };
@@ -79,7 +79,7 @@ export const LIGHTING = {
     spots: (g) => [{
       pos: g.centre.clone().add(v(0.45, 0.4, 0.72).multiplyScalar(g.distance)),
       target: g.centre.clone().add(v(g.halfW * 0.1, g.halfH * 0.1, 0)),
-      color: [1.0, 0.76, 0.5], intensity: 4.6, cover: g.radius * 1.15, penumbra: 1.0, soft: 0.05,
+      color: [1.0, 0.84, 0.64], intensity: 4.6, cover: g.radius * 1.15, penumbra: 1.0, soft: 0.05,
     }],
   },
   window: {
@@ -100,7 +100,7 @@ export const LIGHTING = {
     spots: (g) => [{
       pos: g.centre.clone().add(v(1.05, 0.2, 0.75).multiplyScalar(g.distance)),
       target: g.centre.clone().add(v(-g.halfW * 0.05, 0, 0)),
-      color: [1.0, 0.68, 0.38], intensity: 5.2, cover: g.radius * 1.5, penumbra: 0.15, soft: 0.012,
+      color: [1.0, 0.84, 0.62], intensity: 3.6, cover: g.radius * 1.5, penumbra: 0.15, soft: 0.012,
       gobo: 'window',
     }],
   },
