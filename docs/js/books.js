@@ -26,6 +26,9 @@ export const PALETTES = {
     '3a3530', '8c857a'],
 };
 
+/** Cover colours when covers show the rating: index is the number of stars, 0 = not rated. */
+export const RATING_COLOURS = ['8d887b', '2f4f7f', '2f7d6b', 'c9a227', 'c96a1b', '9e1b1b'];
+
 export const SPINE_FONTS = [
   { family: '"Gill Sans", "Gill Sans MT", "Trebuchet MS", "Segoe UI", sans-serif', weight: 600 },
   { family: 'Georgia, "Times New Roman", serif', weight: 700 },
@@ -199,6 +202,7 @@ export function readBooks(text, options) {
       pages: pages && pages > 0 ? Math.round(pages) : null,
       dateKey: dateRead ? dateRead.key : (dateAdded ? dateAdded.key : 0),
       rating: parseNumber(cell(row, 'rating')) || 0,
+      stars: Math.max(0, Math.min(5, Math.round(parseNumber(cell(row, 'rating')) || 0))),   // 0 = not rated
       binding: cell(row, 'binding').toLowerCase(),
       year: parseNumber(cell(row, 'year')) || 0,
       index: books.length,
@@ -235,7 +239,8 @@ export function assignLooks(books, opts) {
     const pick = opts.colorBy === 'author' && book.author
       ? new Rng(crc32(book.author) ^ opts.seed)
       : rng;
-    const base = pick.choice(palette);
+    const chosen = pick.choice(palette);
+    const base = opts.ratings === 'colour' ? hexToRgb(RATING_COLOURS[book.stars]) : chosen;
     const jitter = 1 + rng.uniform(-0.07, 0.07);
     book.color = base.map((c) => Math.min(c * jitter, 1));
     const lum = luminance(book.color);
@@ -304,7 +309,8 @@ const runWidth = (run) => run.reduce((sum, b) => sum + b.t + BOOK_GAP, 0);
 /**
  * Decide where every book and decoration goes.
  * props: [{name, w, d, h}] decorations that may be used. aspect: picture width / height.
- * Returns {rows, shelfW, pitch, clearH, placements}.
+ * opts.groups (optional): [{label, books}] to give each group its own shelves, in that order.
+ * Returns {rows, shelfW, pitch, clearH, placements, rowLabels}.
  */
 export function planLayout(books, opts, props, aspect) {
   const rng = new Rng(opts.seed * 104729 + 17);
@@ -332,8 +338,25 @@ export function planLayout(books, opts, props, aspect) {
     return Math.max(MIN_SHELF_W, (totalW + reserved) / n / (1 - ROW_SLACK));
   };
 
+  // With groups (a shelf for each rating), every group starts on a new shelf.
+  const groups = (opts.groups || []).filter((g) => g.books.length);
   let nRows = opts.rows;
-  if (!nRows) {
+  let groupRows = null;
+  if (groups.length) {
+    const widths = groups.map((g) => runWidth(g.books));
+    let best = null;
+    for (let n = 1; n <= 80; n++) {
+      const c = decorCounts(n);
+      const perRowDecor = (c.props * (avgPropW + 0.04) + c.stacks * stackReserve) / n;
+      const usable = Math.max(shelfWidthFor(n) * (1 - ROW_SLACK) - perRowDecor, 0.2);
+      const need = widths.map((w, i) => Math.min(Math.max(1, Math.ceil(w / usable)), groups[i].books.length));
+      const total = need.reduce((a, b) => a + b, 0);
+      const zoom = Math.min(aspect / (shelfWidthFor(n) + 2 * SHELF_END_MARGIN), 1 / (total * pitch));
+      if (!best || zoom > best.zoom * 1.001) best = { zoom, need, total };
+    }
+    groupRows = best.need;
+    nRows = best.total;
+  } else if (!nRows) {
     // The shelf count that lets the books appear largest in the picture.
     let best = null;
     for (let n = 1; n <= 80; n++) {
@@ -354,27 +377,36 @@ export function planLayout(books, opts, props, aspect) {
   const reserved = [...Array(nRows).keys()].map((r) =>
     (rowProp.has(r) ? rowProp.get(r).w + 0.04 : 0) + (rowStack.has(r) ? stackReserve : 0));
 
-  // Share the books out so every shelf ends up about equally full.
+  // Share a list of books over the shelves first..first+count-1 so each ends up about equally full.
   const rows = [];
-  let idx = 0;
-  let remaining = totalW;
-  for (let r = 0; r < nRows; r++) {
-    if (r === nRows - 1) { rows.push(books.slice(idx)); break; }
-    const reservedLeft = reserved.slice(r).reduce((a, b) => a + b, 0);
-    const target = (remaining + reservedLeft) / (nRows - r) - reserved[r];
-    const row = [];
-    let acc = 0;
-    const mustLeave = nRows - r - 1;
-    while (idx < books.length - mustLeave) {
-      const step = books[idx].t + BOOK_GAP;
-      if (row.length && acc + step / 2 > target) break;
-      row.push(books[idx]);
-      acc += step;
-      idx++;
+  const rowLabels = [];
+  const share = (list, first, count, label) => {
+    let idx = 0;
+    let remaining = runWidth(list);
+    for (let k = 0; k < count; k++) {
+      const r = first + k;
+      rowLabels[r] = label;
+      if (k === count - 1) { rows[r] = list.slice(idx); break; }
+      const reservedLeft = reserved.slice(r, first + count).reduce((a, b) => a + b, 0);
+      const target = (remaining + reservedLeft) / (count - k) - reserved[r];
+      const row = [];
+      let acc = 0;
+      const mustLeave = count - k - 1;
+      while (idx < list.length - mustLeave) {
+        const step = list[idx].t + BOOK_GAP;
+        if (row.length && acc + step / 2 > target) break;
+        row.push(list[idx]);
+        acc += step;
+        idx++;
+      }
+      remaining -= acc;
+      rows[r] = row;
     }
-    remaining -= acc;
-    rows.push(row);
-  }
+  };
+  if (groupRows) {
+    let first = 0;
+    groups.forEach((g, i) => { share(g.books, first, groupRows[i], g.label); first += groupRows[i]; });
+  } else share(books, 0, nRows, undefined);
 
   // The left-to-right sequence of segments on every shelf.
   const rowSegments = rows.map((rowBooks, r) => {
@@ -430,10 +462,13 @@ export function planLayout(books, opts, props, aspect) {
     let sum = weights.reduce((a, b) => a + b, 0);
     if (!sum) { weights[segs.length] = 1; sum = 1; }
     const gaps = weights.map((w) => (free * w) / sum);
-    for (let j = 1; j < segs.length; j++) {     // no wide holes between two runs of books
-      if (segs[j - 1].kind === 'run' && segs[j].kind === 'run' && gaps[j] > 0.11) {
-        gaps[segs.length] += gaps[j] - 0.11;
-        gaps[j] = 0.11;
+    // No wide holes: on a part-empty shelf everything stays together at the left, as people shelve.
+    for (let j = 0; j < segs.length; j++) {
+      const betweenRuns = j > 0 && segs[j - 1].kind === 'run' && segs[j].kind === 'run';
+      const limit = betweenRuns ? 0.11 : 0.15;
+      if (gaps[j] > limit) {
+        gaps[segs.length] += gaps[j] - limit;
+        gaps[j] = limit;
       }
     }
 
@@ -498,7 +533,7 @@ export function planLayout(books, opts, props, aspect) {
     });
   });
 
-  return { rows: nRows, shelfW, pitch, clearH, placements };
+  return { rows: nRows, shelfW, pitch, clearH, placements, rowLabels: groupRows ? rowLabels : null };
 }
 
 /** Break words into n lines so the longest line is as short as possible. */

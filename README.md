@@ -25,7 +25,11 @@ Once Pages is switched on (see below) it is at <https://drburke-droid.github.io/
 4. Choose a scene: Classic parlour, Old library, Modern gallery, Cool study, Sunlit room or
    Evening lamp. Each sets the wall, shelf finish, lighting and colours together, and you can then
    change any of them on its own.
-5. Click **Download picture**.
+5. Optionally show your own star ratings in the picture with **Show ratings**:
+   - *Stars on spines* prints each book's stars at the foot of its spine.
+   - *Cover colour* colours the covers by rating (red for five stars) and adds a key under the shelves.
+   - *A shelf for each rating* puts five-star books on the top shelf, then four, and labels every shelf.
+6. Click **Download picture**.
 
 To switch the site on: in the repository on GitHub go to *Settings → Pages*, set **Source** to
 *Deploy from a branch*, choose the `main` branch and the `/docs` folder, and save.

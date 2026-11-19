@@ -169,6 +169,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 }
 .primary:hover { filter: brightness(1.08); }
 .primary:disabled { opacity: 0.6; cursor: progress; }
+select:disabled { opacity: 0.45; cursor: not-allowed; }
 .download select { width: auto; }
 
 .link {

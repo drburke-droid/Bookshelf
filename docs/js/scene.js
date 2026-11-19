@@ -216,7 +216,65 @@ function drawEmblem(ctx, kind, cx, cy, e) {
   }
 }
 
-/** Paint one spine: cover colour, wear, bands, title, author and publisher's emblem. */
+function drawStar(ctx, cx, cy, radius, filled = true) {
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 ? radius * 0.45 : radius;
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    ctx.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a));
+  }
+  ctx.closePath();
+  if (filled) ctx.fill();
+  else { ctx.lineWidth = Math.max(1, radius * 0.14); ctx.stroke(); }
+}
+
+/** The card in a shelf's label holder: five stars with the rating filled in, or "Not rated". */
+function ratingPlateCanvas(stars) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 440;
+  canvas.height = 120;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#efe8d6';
+  ctx.fillRect(0, 0, 440, 120);
+  ctx.fillStyle = ctx.strokeStyle = '#2a221c';
+  if (stars > 0) {
+    for (let i = 0; i < 5; i++) drawStar(ctx, 60 + i * 80, 60, 32, i < stars);
+  } else {
+    ctx.font = '600 50px Georgia, "Times New Roman", serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Not rated', 220, 64);
+  }
+  return canvas;
+}
+
+/** The key shown under the shelves when cover colour stands for the rating. entries: [{stars, color}]. */
+function ratingKeyCanvas(entries) {
+  const cell = 330;
+  const canvas = document.createElement('canvas');
+  canvas.width = cell * entries.length + 40;
+  canvas.height = 120;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#f1ecdf';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  entries.forEach((entry, i) => {
+    const x = 30 + i * cell;
+    ctx.fillStyle = css(entry.color);
+    ctx.fillRect(x, 26, 52, 68);                       // a little book spine in that colour
+    ctx.fillStyle = ctx.strokeStyle = '#2a221c';
+    if (entry.stars > 0) {
+      for (let k = 0; k < 5; k++) drawStar(ctx, x + 92 + k * 44, 60, 19, k < entry.stars);
+    } else {
+      ctx.font = '600 38px Georgia, "Times New Roman", serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Not rated', x + 72, 62);
+    }
+  });
+  return canvas;
+}
+
+/** Paint one spine: cover colour, wear, bands, title, author, publisher's emblem and, if asked, stars. */
 function drawLabel(ctx, x, y, w, h, book, density, show, flat) {
   ctx.save();
   ctx.beginPath();
@@ -261,8 +319,22 @@ function drawLabel(ctx, x, y, w, h, book, density, show, flat) {
   let bottom = book.bands ? 0.9 : 0.94;
   const font = SPINE_FONTS[book.font];
   const maxPx = MAX_TEXT_M * density;
+  // The reader's star rating at the foot of the spine: a row on thick books, a column on thin ones.
+  const stars = show.stars && w >= 8 ? book.stars : 0;
+  if (stars) {
+    const largest = 0.012 * density;
+    const inRow = (w * 0.9) / 5.4 >= 0.0075 * density;
+    const e = inRow ? Math.min((w * 0.9) / 5.4, largest) : Math.min(w * 0.56, largest);
+    ctx.fillStyle = book.ink === 'dark' ? INK.dark : INK.gold;
+    for (let i = 0; i < stars; i++) {
+      if (inRow) drawStar(ctx, x + w / 2 + (i - (stars - 1) / 2) * e * 1.08, y + h * bottom - e * 0.55, e / 2);
+      else drawStar(ctx, x + w / 2, y + h * bottom - e * 0.55 - i * e * 1.1, e / 2);
+    }
+    bottom -= ((inRow ? 1.2 : stars * 1.1) * e) / h + 0.012;
+    ctx.fillStyle = ink;
+  }
   const withAuthor = show.authors && book.surname && w >= 9;
-  if (withAuthor) {
+  if (withAuthor && !stars) {
     const e = Math.min(w * 0.34, 0.011 * density);
     drawEmblem(ctx, book.mark, x + w / 2, y + h * (bottom - 0.022), e);
     bottom -= 0.06;
@@ -733,7 +805,8 @@ export class BookshelfView {
 
   /**
    * Rebuild everything from a layout plan.
-   * opts: {style, titles, authors, wallType, wall:[r,g,b] sRGB, wood, lighting, aspect}
+   * opts: {style, titles, authors, wallType, wall:[r,g,b] sRGB, wood, lighting, aspect,
+   *        ratings: 'off'|'stars'|'colour'|'shelves', legend: [{stars, color}] for the colour key}
    */
   build(plan, opts) {
     this.disposeContent();
@@ -824,7 +897,8 @@ export class BookshelfView {
     // Spines: artwork drawn on shared textures and wrapped over the curved spine
     const labelItems = bookItems.map((p) => ({ book: p.book, flat: p.kind === 'flat', matrix: p.matrix, profile: p.profile }));
     if (labelItems.length) {
-      const canvases = buildLabelAtlases(labelItems, this.maxTexture, { titles: opts.titles, authors: opts.authors });
+      const canvases = buildLabelAtlases(labelItems, this.maxTexture,
+        { titles: opts.titles, authors: opts.authors, stars: opts.ratings === 'stars' });
       this.debugLabels = { canvases, items: labelItems };      // for tests, like debugPlacements
       canvases.forEach((canvas, page) => {
         const texture = new THREE.CanvasTexture(canvas);
@@ -858,10 +932,48 @@ export class BookshelfView {
       this.content.add(object);
     }
 
-    // Camera
+    // A framed card, used for shelf labels and the colour key. Returns nothing; adds two meshes.
+    const addCard = (canvas, cx, cy, z, width, height) => {
+      const frame = new Buffers();
+      frame.box(identity, cx - width / 2, cx + width / 2, cy - height / 2, cy + height / 2, z, z + 0.003, null, null, 0.001);
+      add(new THREE.Mesh(frame.toGeometry(),
+        new THREE.MeshStandardMaterial({ color: 0x8a6a34, metalness: 0.85, roughness: 0.38 })));
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.anisotropy = anisotropy;
+      texture.userData.owned = true;
+      const rim = 0.0028;
+      const card = new THREE.Mesh(new THREE.PlaneGeometry(width - rim * 2, height - rim * 2),
+        new THREE.MeshStandardMaterial({ map: texture, roughness: 0.8 }));
+      card.position.set(cx, cy, z + 0.0033);
+      add(card, false);
+    };
+
+    // A shelf for each rating: a label holder on the front edge of every shelf.
+    if (plan.rowLabels) {
+      const plateW = Math.min(0.15, boardW * 0.3);
+      const plateH = plateW * (120 / 440);
+      rowY.forEach((y, r) => {
+        if (plan.rowLabels[r] === undefined) return;
+        addCard(ratingPlateCanvas(plan.rowLabels[r]), -boardW / 2 + plateW / 2 + 0.03,
+          y - SHELF_THICK / 2 - 0.004, SHELF_DEPTH, plateW, plateH);
+      });
+    }
+
+    // Cover colour by rating: a key on the wall under the shelves, so the picture explains itself.
     const blockW = boardW + 2 * side;
-    const blockH = topY - bottomY;
-    const centreY = (topY + bottomY) / 2;
+    let frameBottom = bottomY;
+    if (opts.legend && opts.legend.length) {
+      const canvas = ratingKeyCanvas(opts.legend);
+      const keyW = Math.min(Math.max(opts.legend.length * 0.2, blockW * 0.6), blockW * 0.98);
+      const keyH = keyW * (canvas.height / canvas.width);
+      addCard(canvas, 0, bottomY - 0.04 - keyH / 2, 0.001, keyW, keyH);
+      frameBottom = bottomY - 0.04 - keyH - 0.012;
+    }
+
+    // Camera
+    const blockH = topY - frameBottom;
+    const centreY = (topY + frameBottom) / 2;
     this.aspect = opts.aspect;
     let tanH = 18 / 50;                      // a 50 mm lens on a 36 mm sensor
     let tanV = tanH / this.aspect;
