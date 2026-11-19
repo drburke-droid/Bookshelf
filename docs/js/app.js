@@ -1,5 +1,5 @@
 // Page wiring: file upload, settings, and keeping the picture up to date.
-import { readBooks, assignLooks, sortBooks, planLayout, hexToRgb, RATING_COLOURS } from './books.js';
+import { readBooks, assignLooks, sortBooks, planLayout, hexToRgb } from './books.js';
 import { BookshelfView } from './scene.js';
 import { SCENES, WALLS, WOODS, LIGHTING } from './scenes.js';
 
@@ -121,22 +121,19 @@ function rebuild() {
   if (opts.limit && books.length > opts.limit) {
     books = opts.sort === 'date' && !opts.reverse ? books.slice(-opts.limit) : books.slice(0, opts.limit);
   }
-  // Showing ratings: group the shelves, or build the key that explains the cover colours.
-  const present = [5, 4, 3, 2, 1, 0].filter((n) => books.some((b) => b.stars === n));
-  if (opts.ratings === 'shelves') opts.groups = present.map((n) => ({ label: n, books: books.filter((b) => b.stars === n) }));
-  if (opts.ratings === 'colour') opts.legend = present.map((n) => ({ stars: n, color: hexToRgb(RATING_COLOURS[n]) }));
+  // Showing ratings: top-rated books on the top shelf, or stars on the spines.
+  if (opts.ratings === 'shelves') {
+    opts.groups = [5, 4, 3, 2, 1, 0].map((n) => ({ label: n, books: books.filter((b) => b.stars === n) }));
+  }
   const notes = {
-    stars: 'Your star rating is printed at the foot of each spine.',
-    colour: 'Covers are coloured by your rating, with a key under the shelves. This replaces the Colours setting.',
     shelves: 'Five-star books go on the top shelf, then four, and so on. Each shelf is labelled.',
+    stars: 'Your star rating is printed at the foot of each spine.',
   };
   let note = notes[opts.ratings] || '';
   if (note && !books.some((b) => b.stars > 0)) note = 'None of these books has a rating in your file.';
   el.ratingsHelp.textContent = note;
   el.ratingsHelp.hidden = !note;
   el.rows.disabled = opts.ratings === 'shelves';
-  el.palette.disabled = opts.ratings === 'colour';
-  el.colorBy.disabled = opts.ratings === 'colour';
 
   const plan = planLayout(books, opts, opts.decor ? view.propList() : [], opts.aspect);
   resizePreview();

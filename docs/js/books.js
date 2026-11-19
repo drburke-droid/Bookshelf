@@ -26,9 +26,6 @@ export const PALETTES = {
     '3a3530', '8c857a'],
 };
 
-/** Cover colours when covers show the rating: index is the number of stars, 0 = not rated. */
-export const RATING_COLOURS = ['8d887b', '2f4f7f', '2f7d6b', 'c9a227', 'c96a1b', '9e1b1b'];
-
 export const SPINE_FONTS = [
   { family: '"Gill Sans", "Gill Sans MT", "Trebuchet MS", "Segoe UI", sans-serif', weight: 600 },
   { family: 'Georgia, "Times New Roman", serif', weight: 700 },
@@ -239,8 +236,7 @@ export function assignLooks(books, opts) {
     const pick = opts.colorBy === 'author' && book.author
       ? new Rng(crc32(book.author) ^ opts.seed)
       : rng;
-    const chosen = pick.choice(palette);
-    const base = opts.ratings === 'colour' ? hexToRgb(RATING_COLOURS[book.stars]) : chosen;
+    const base = pick.choice(palette);
     const jitter = 1 + rng.uniform(-0.07, 0.07);
     book.color = base.map((c) => Math.min(c * jitter, 1));
     const lum = luminance(book.color);

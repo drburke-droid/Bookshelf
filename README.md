@@ -26,9 +26,9 @@ Once Pages is switched on (see below) it is at <https://drburke-droid.github.io/
    Evening lamp. Each sets the wall, shelf finish, lighting and colours together, and you can then
    change any of them on its own.
 5. Optionally show your own star ratings in the picture with **Show ratings**:
-   - *Stars on spines* prints each book's stars at the foot of its spine.
-   - *Cover colour* colours the covers by rating (red for five stars) and adds a key under the shelves.
-   - *A shelf for each rating* puts five-star books on the top shelf, then four, and labels every shelf.
+   - *Top rated on the top shelf* puts five-star books on the top shelf, then four, and so on, and
+     labels every shelf.
+   - *Stars on spines* prints each book's stars, small, at the foot of its spine.
 6. Click **Download picture**.
 
 To switch the site on: in the repository on GitHub go to *Settings → Pages*, set **Source** to

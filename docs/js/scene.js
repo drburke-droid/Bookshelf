@@ -248,32 +248,6 @@ function ratingPlateCanvas(stars) {
   return canvas;
 }
 
-/** The key shown under the shelves when cover colour stands for the rating. entries: [{stars, color}]. */
-function ratingKeyCanvas(entries) {
-  const cell = 330;
-  const canvas = document.createElement('canvas');
-  canvas.width = cell * entries.length + 40;
-  canvas.height = 120;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#f1ecdf';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  entries.forEach((entry, i) => {
-    const x = 30 + i * cell;
-    ctx.fillStyle = css(entry.color);
-    ctx.fillRect(x, 26, 52, 68);                       // a little book spine in that colour
-    ctx.fillStyle = ctx.strokeStyle = '#2a221c';
-    if (entry.stars > 0) {
-      for (let k = 0; k < 5; k++) drawStar(ctx, x + 92 + k * 44, 60, 19, k < entry.stars);
-    } else {
-      ctx.font = '600 38px Georgia, "Times New Roman", serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('Not rated', x + 72, 62);
-    }
-  });
-  return canvas;
-}
-
 /** Paint one spine: cover colour, wear, bands, title, author, publisher's emblem and, if asked, stars. */
 function drawLabel(ctx, x, y, w, h, book, density, show, flat) {
   ctx.save();
@@ -322,9 +296,9 @@ function drawLabel(ctx, x, y, w, h, book, density, show, flat) {
   // The reader's star rating at the foot of the spine: a row on thick books, a column on thin ones.
   const stars = show.stars && w >= 8 ? book.stars : 0;
   if (stars) {
-    const largest = 0.012 * density;
-    const inRow = (w * 0.9) / 5.4 >= 0.0075 * density;
-    const e = inRow ? Math.min((w * 0.9) / 5.4, largest) : Math.min(w * 0.56, largest);
+    const largest = 0.007 * density;                  // a star is at most 7 mm across
+    const inRow = (w * 0.9) / 5.4 >= 0.0045 * density;
+    const e = inRow ? Math.min((w * 0.9) / 5.4, largest) : Math.min(w * 0.36, largest);
     ctx.fillStyle = book.ink === 'dark' ? INK.dark : INK.gold;
     for (let i = 0; i < stars; i++) {
       if (inRow) drawStar(ctx, x + w / 2 + (i - (stars - 1) / 2) * e * 1.08, y + h * bottom - e * 0.55, e / 2);
@@ -806,7 +780,7 @@ export class BookshelfView {
   /**
    * Rebuild everything from a layout plan.
    * opts: {style, titles, authors, wallType, wall:[r,g,b] sRGB, wood, lighting, aspect,
-   *        ratings: 'off'|'stars'|'colour'|'shelves', legend: [{stars, color}] for the colour key}
+   *        ratings: 'off'|'shelves'|'stars'}
    */
   build(plan, opts) {
     this.disposeContent();
@@ -932,7 +906,7 @@ export class BookshelfView {
       this.content.add(object);
     }
 
-    // A framed card, used for shelf labels and the colour key. Returns nothing; adds two meshes.
+    // A small framed card, used for the shelf labels.
     const addCard = (canvas, cx, cy, z, width, height) => {
       const frame = new Buffers();
       frame.box(identity, cx - width / 2, cx + width / 2, cy - height / 2, cy + height / 2, z, z + 0.003, null, null, 0.001);
@@ -960,20 +934,11 @@ export class BookshelfView {
       });
     }
 
-    // Cover colour by rating: a key on the wall under the shelves, so the picture explains itself.
     const blockW = boardW + 2 * side;
-    let frameBottom = bottomY;
-    if (opts.legend && opts.legend.length) {
-      const canvas = ratingKeyCanvas(opts.legend);
-      const keyW = Math.min(Math.max(opts.legend.length * 0.2, blockW * 0.6), blockW * 0.98);
-      const keyH = keyW * (canvas.height / canvas.width);
-      addCard(canvas, 0, bottomY - 0.04 - keyH / 2, 0.001, keyW, keyH);
-      frameBottom = bottomY - 0.04 - keyH - 0.012;
-    }
 
     // Camera
-    const blockH = topY - frameBottom;
-    const centreY = (topY + frameBottom) / 2;
+    const blockH = topY - bottomY;
+    const centreY = (topY + bottomY) / 2;
     this.aspect = opts.aspect;
     let tanH = 18 / 50;                      // a 50 mm lens on a 36 mm sensor
     let tanV = tanH / this.aspect;
